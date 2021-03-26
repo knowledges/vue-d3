@@ -384,7 +384,7 @@ export default {
         .force('link', d3.forceLink(links).id(d => d.id).distance(120))
         .force('charge', d3.forceManyBody())
         .force('collision', d3.forceCollide(r * 2))
-        .force('radial', d3.forceRadial(function(d) { return d.type === 'a' ? 200 : 400 }))
+        // .force('radial', d3.forceRadial(function(d) { return d.type === "a" ? 200 : 400; }))
         .force('center', d3.forceCenter(width / 2, height / 2))
 
       const svg = d3.select('.container')
@@ -439,7 +439,7 @@ export default {
         .join('path')
         .attr('stroke-width', d => Math.sqrt(d.value))
         .attr('id', d => d.source + '_' + d.relationship + '_' + d.target)
-
+      
       this.linksName = g.append('g')
         .selectAll('text')
         .data(links)
@@ -491,7 +491,7 @@ export default {
 
       this.simulation.on('tick', () => {
         this.links
-          .attr('d', d => 'M' + d.source.x + ' ' + d.source.y + ' L' + d.target.x + ' ' + d.target.y)
+        .attr('d', d=> 'M' + d.source.x + ' ' + d.source.y + ' L' +  d.target.x + ' ' + d.target.y)
           // .attr('x1', d => d.source.x)
           // .attr('y1', d => d.source.y)
           // .attr('x2', d => d.target.x)
