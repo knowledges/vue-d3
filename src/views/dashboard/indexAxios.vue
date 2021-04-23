@@ -372,26 +372,26 @@ export default {
   created() {},
   mounted() {
     axios.get('http://10.20.11.251:8084/szwm/neo/partytocase/selectPartyToCaseByCaseTimes?times=5')
-    .then(response => {
-      const data = response.data
+      .then(response => {
+        const data = response.data
 
-      let set = new Set()
-      data.forEach(item => {
-        item.start.id = item.start.partyName
-        set.add(item.start) // node
+        const set = new Set()
+        data.forEach(item => {
+          item.start.id = item.start.partyName
+          set.add(item.start) // node
+        })
+        //  set 转换 数组
+        const array = Array.from(set)
+        console.log(array)
+        // 去重
+        const obj = {}
+        this.dataList.nodes = array.reduce((cur, next) => {
+          obj[next.partyName] ? '' : obj[next.partyName] = true && cur.push(next)
+          return cur
+        }, [])
+        console.log(this.dataList.nodes)
+        this.initGraph(this.dataList)
       })
-      //  set 转换 数组
-      const array = Array.from(set)
-      console.log(array)
-      // 去重
-      let obj = {}
-      this.dataList.nodes = array.reduce((cur, next) => {
-        obj[next.partyName] ? '' : obj[next.partyName] = true && cur.push(next)
-        return cur
-      }, [])
-      console.log(this.dataList.nodes)
-      this.initGraph(this.dataList)
-    })
   },
   beforeDestroy() {},
   methods: {
@@ -460,7 +460,7 @@ export default {
         .join('path')
         .attr('stroke-width', 1)
         .attr('id', d => d.source + '_' + d.type + '_' + d.target)
-      
+
       this.linksName = g.append('g')
         .selectAll('text')
         .data(links)
@@ -512,7 +512,7 @@ export default {
 
       this.simulation.on('tick', () => {
         this.links
-        .attr('d', d=> 'M' + d.source.x + ' ' + d.source.y + ' L' +  d.target.x + ' ' + d.target.y)
+          .attr('d', d => 'M' + d.source.x + ' ' + d.source.y + ' L' + d.target.x + ' ' + d.target.y)
           // .attr('x1', d => d.source.x)
           // .attr('y1', d => d.source.y)
           // .attr('x2', d => d.target.x)
@@ -642,27 +642,27 @@ export default {
      */
     circleClk(target, items) {
       axios.get('http://10.20.11.251:8084/szwm/neo/partytocase/selectPartyToCaseByPartyName?partyName=' + items.partyName)
-      .then(response => {
-        const data = response.data
+        .then(response => {
+          const data = response.data
 
-        let array = []
-        data.forEach((item) => {
-          item.end.id = item.end.caseName
-          item.end.type = item.type
-          item.end.group = item.end.group || 2
-          array.push(item.end)
+          const array = []
+          data.forEach((item) => {
+            item.end.id = item.end.caseName
+            item.end.type = item.type
+            item.end.group = item.end.group || 2
+            array.push(item.end)
+          })
+
+          array.forEach(item => {
+            console.log(item)
+            this.dataList.nodes.push(item)
+            item.source = items.id
+            item.target = item.id
+            this.dataList.links.push(item)
+          })
+          console.log(this.dataList)
+          this.updatedGraph(this.dataList)
         })
-        
-        array.forEach(item => {
-          console.log(item)
-          this.dataList.nodes.push(item)
-          item.source = items.id
-          item.target = item.id
-          this.dataList.links.push(item)
-        })
-        console.log(this.dataList)
-        this.updatedGraph(this.dataList)
-      }) 
       // const data = [{ 'id': 'Mlle.Baptistine', 'group': 2 },
       //   { 'id': 'Mme.Magloire', 'group': 2 },
       //   { 'id': 'CountessdeLo', 'group': 2 },

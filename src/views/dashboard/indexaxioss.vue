@@ -6,58 +6,15 @@
   修改记录：
   修改内容：
   修改人员：
-  修改时间： 线条弯曲
+  修改时间：2021-3-30 09:58:50
 -->
 <template>
-  <div class="container">
-    <el-card class="box-card" style="position: absolute;width: 450px;top: 0;right: 0;">
-      <div slot="header" class="clearfix">
-        <span>节点信息</span>
-        <!-- <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button> -->
-      </div>
-      <div v-if="form.partyName" class="text item">
-        <div class="opt">
-          <el-form ref="form" :model="form" label-width="80px">
-            <el-form-item label="零售户">
-              <el-input v-model="form.partyName" disabled />
-            </el-form-item>
-            <el-form-item label="当事人">
-              <el-input v-model="form.partyIsCust" disabled />
-            </el-form-item>
-            <el-form-item label="查询条件">
-              <el-select v-model="form.opts" placeholder="请选择活动区域">
-                <el-option label="手机号" value="shanghai" />
-                <el-option label="专卖证" value="beijing" />
-                <el-option label="同案" value="beijing" />
-                <el-option label="涉案" value="beijing" />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="时间">
-              <el-col :span="11">
-                <el-date-picker v-model="form.start" type="date" placeholder="选择开始日期" style="width: 100%;" />
-              </el-col>
-              <el-col style="text-align: center;" class="line" :span="2">-</el-col>
-              <el-col :span="11">
-                <el-date-picker v-model="form.end" placeholder="选择结束时间" style="width: 100%;" />
-              </el-col>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" size="mini">搜索</el-button>
-            </el-form-item>
-          </el-form>
-        </div>
-      </div>
-      <div v-else>
-        <p style="color: #999;">请点击零售户人名查询</p>
-      </div>
-    </el-card>
-  </div>
+  <div class="container" />
 </template>
 
 <script>
 import * as d3 from 'd3'
 import axios from 'axios'
-import JSOG from 'jsog'
 export default {
   name: 'Index',
   components: {},
@@ -82,31 +39,22 @@ export default {
       nodes: [],
       linksName: [],
       nodesName: [],
-      simulation: null,
-      form: {
-        partyName: '',
-        partyIsCust: '',
-        opts: '',
-        start: new Date(),
-        end: new Date()
-      }
+      simulation: null
     }
   },
   computed: {},
   watch: {},
-  created() {
-    console.log(JSOG)
-  },
+  created() {},
   mounted() {
     axios.get('http://10.20.11.251:8084/szwm/neo/partytocase/selectPartyToCaseByCaseTimes?times=5')
       .then(response => {
-        const data = JSOG.decode(response.data)
-        console.log('数据结构data=>', data)
+        const data = response.data
+
         this.dataList.nodes = data.map((item) => {
           item.start.rowId = item.start.rowId.toString()
           return item.start
         })
-        console.log(this.dataList)
+
         this.initGraph(this.dataList)
       })
   },
@@ -119,15 +67,11 @@ export default {
       const nodes = data.nodes.map(d => Object.create(d))
 
       this.simulation = d3.forceSimulation(nodes)
-        .force('link', d3.forceLink(links).id(d => d.rowId).distance(180).strength(0.1)) // 弹簧力
-        .force('charge', d3.forceManyBody()) // 电荷力[吸引力]
-        .force('collision', d3.forceCollide(r * 2)) // 碰撞检测
-        // .force('radial', d3.forceRadial()
-        //   .radius(this.condition.r + 10)
-        //   .x(d => d.x)
-        //   .y(d => d.y)
-        // )
-        .force('center', d3.forceCenter(width / 2, height / 2)) // 向心力
+        .force('link', d3.forceLink(links).id(d => d.rowId).distance(180))
+        .force('charge', d3.forceManyBody())
+        .force('collision', d3.forceCollide(r * 2))
+        // .force('radial', d3.forceRadial(function(d) { return d.type === "a" ? 200 : 400; }))
+        .force('center', d3.forceCenter(width / 2, height / 2))
 
       const svg = d3.select('.container')
         .append('svg')
@@ -135,7 +79,7 @@ export default {
         .style('height', 500)
         .style('position', 'absolute')
         .style('top', '50%')
-        .style('left', '40%')
+        .style('left', '50%')
         .style('transform', 'translate(-50%, -50%)')
         .style('border-radius', '8px')
         .style('background-color', 'wheat')
@@ -152,48 +96,30 @@ export default {
        * markerWidth、markerHeight：marker大小
        * stroke-width: 线条粗细
        */
-      const markerPre = svg.append('defs')
+      const marker = svg.append('defs')
         .append('marker')
-        .attr('id', 'arrowPre')
+        .attr('id', 'arrow')
         .attr('stroke-width', 1)
         .attr('markerUnits', 'strokeWidth')
         .attr('markerUnits', 'userSpaceOnUse')
         .attr('viewBox', '0 -5 10 10')
         .attr('refX', 40)
-        .attr('refY', -3)
+        .attr('refY', 0)
         .attr('markerWidth', 10)
         .attr('markerHeight', 12)
         .attr('orient', 'auto')
         .append('path')
-        .attr('d', 'M 0 -3 L 11 -1 L 1 5')
+        .attr('d', 'M 0 -5 L 10 0 L 0 5')
         .attr('fill', '#999')
-        .attr('stroke-opacity', 0.6)
-
-      const markerNext = svg.append('defs')
-        .append('marker')
-        .attr('id', 'arrowNext')
-        .attr('stroke-width', 1)
-        .attr('markerUnits', 'strokeWidth')
-        .attr('markerUnits', 'userSpaceOnUse')
-        .attr('viewBox', '0 -5 10 10')
-        .attr('refX', 40)
-        .attr('refY', -2.5)
-        .attr('markerWidth', 10)
-        .attr('markerHeight', 12)
-        .attr('orient', 'auto')
-        .append('path')
-        .attr('d', 'M 2 -3 L 11 0 L 3 5')
-        .attr('fill', '#999')
-        .attr('stroke-opacity', 0.6)
+        .attr('stroke-opacity', 1)
 
       const g = svg.append('g')
 
       this.links = g.append('g')
-        .attr('fill', 'none')
         .attr('stroke-width', 0.5)
         .attr('stroke', '#999')
         .attr('stroke-opacity', 0.6)
-        .attr('marker-end', 'url(#arrowPre)')
+        .attr('marker-end', 'url(#arrow)')
         .selectAll('path')
         .data(links)
         .join('path')
@@ -210,7 +136,7 @@ export default {
         .data(links)
         .join('text')
         .style('text-anchor', 'middle')
-        .style('fill', '#000')
+        .style('fill', '#333')
         .style('font-size', 12)
         .style('font-weight', 500)
         .append('textPath')
@@ -219,7 +145,7 @@ export default {
         .text(d => d.caseRelation + '·' + d.type)
 
       this.nodes = g.append('g')
-        .attr('stroke', '#FFF')
+        .attr('stroke', '#fff')
         .attr('stroke-width', 1.5)
         .selectAll('circle')
         .data(nodes)
@@ -243,37 +169,15 @@ export default {
       this.simulation.on('tick', () => {
         // 文字方向修改------文字方向永远处于可辨别方向
         this.links
-          .attr('d', (d) => {
-            const r = Math.hypot(d.target.x - d.source.x, d.target.y - d.source.y)
-
-            if (d.source.x < d.target.x) {
-            // return 'M' + d.source.x + ' ' + d.source.y + ' L' +  d.target.x + ' ' + d.target.y
-              return `
-              M${d.source.x},${d.source.y}
-              A${r},${r} 0 0,1 ${d.target.x},${d.target.y}
-            `
-            } else {
-            // return 'M' + d.target.x + ' ' + d.target.y + ' L' +  d.source.x + ' ' + d.source.y
-              return `
-              M${d.target.x},${d.target.y}
-              A${r},${r} 1 0,1 ${d.source.x},${d.source.y}
-            `
-            }
-          })
-          .attr('marker-end', (d) => {
-            if (d.source.x < d.target.x) {
-              return 'url(#arrowNext)'
-            } else {
-              return null
-            }
-          })
-          .attr('marker-start', (d) => {
-            if (d.source.x < d.target.x) {
-              return null
-            } else {
-              return 'url(#arrowPro)'
-            }
-          })
+          .attr('d', d => 'M' + d.source.x + ' ' + d.source.y + ' L' + d.target.x + ' ' + d.target.y)
+        // this.links
+        // .attr('d', (d) => {
+        //   if (d.source.x < d.target.x) {
+        //     return d=> 'M' + d.source.x + ' ' + d.source.y + ' L' +  d.target.x + ' ' + d.target.y
+        //   } else {
+        //     return d=> 'M' + d.target.x + ' ' + d.target.y + ' L' +  d.source.x + ' ' + d.source.y
+        //   }
+        // })
 
         this.nodes.attr('cx', d => d.x)
           .attr('cy', d => d.y)
@@ -293,10 +197,8 @@ export default {
         .data(links)
         .enter()
         .append('path')
-        .attr('fill', 'none')
-        .attr('stroke', '#999')
         .attr('stroke-width', 1)
-        .attr('marker-end', 'url(#arrowPre)')
+        .attr('marker-end', 'url(#arrow)')
         .attr('id', (d) => d.parentId + '_' + d.caseRelation + '_' + d.type)
         .merge(this.links)
 
@@ -310,7 +212,7 @@ export default {
         .enter()
         .append('text')
         .style('text-anchor', 'middle')
-        .style('fill', '#000')
+        .style('fill', '#333')
         .style('font-size', 12)
         .style('font-weight', 500)
         .append('textPath')
@@ -391,11 +293,10 @@ export default {
      * @param item 当前数据对象
      */
     circleClk(target, items) {
-      this.form.partyName = items.partyName
-      this.form.partyIsCust = items.partyIsCust
+      console.log('点击人的信息', items)
       axios.get('http://10.20.11.251:8084/szwm/neo/partytocase/selectPartyToCaseByPartyId?rowId=' + items.rowId)
         .then(response => {
-          const data = JSOG.decode(response.data)
+          const data = response.data
           // 重构 end 数组
           const array = data.map((item) => {
             item.end.rowId = item.end.rowId.toString()
@@ -424,6 +325,36 @@ export default {
           }
           this.updatedGraph(this.dataList)
         })
+      // const data = [{ 'id': 'Mlle.Baptistine', 'group': 2 },
+      //   { 'id': 'Mme.Magloire', 'group': 2 },
+      //   { 'id': 'CountessdeLo', 'group': 2 },
+      //   { 'id': 'Geborand', 'group': 2 }]
+      // console.log(data)
+      // // TODO 请求到的数据 重新渲染画布
+      // setTimeout(() => {
+      //   for (let i = 0; i < data.length; i++) {
+      //     let flage = true
+
+      //     for (let j = 0; j < this.dataList.nodes.length; j++) {
+      //       if (data[i].id === this.dataList.nodes[j].id) {
+      //         flage = false
+      //         break
+      //       }
+      //     }
+
+      //     if (flage) {
+      //       this.dataList.nodes.push(data[i])
+      //       this.dataList.links.push({
+      //         source: item.id.toString(),
+      //         target: data[i].id.toString(),
+      //         value: 5,
+      //         relationship: '涉案'
+      //       })
+      //     }
+      //   }
+      //   console.log('打印结果', this.dataList)
+      //   this.updatedGraph(this.dataList)
+      // }, 2000)
     },
     textElipsis(val) {
       var len = 0
@@ -477,16 +408,5 @@ text {
 }
 .demonstration {
   line-height: 35px;
-}
-ul li {
-  list-style: none;
-}
-.left {
-  display: inline-block;
-  width: 70px;
-  text-align: right;
-}
-.right {
-  display: inline-block;
 }
 </style>

@@ -57,7 +57,6 @@
 <script>
 import * as d3 from 'd3'
 import axios from 'axios'
-import JSOG from 'jsog'
 export default {
   name: 'Index',
   components: {},
@@ -94,19 +93,17 @@ export default {
   },
   computed: {},
   watch: {},
-  created() {
-    console.log(JSOG)
-  },
+  created() {},
   mounted() {
     axios.get('http://10.20.11.251:8084/szwm/neo/partytocase/selectPartyToCaseByCaseTimes?times=5')
       .then(response => {
-        const data = JSOG.decode(response.data)
-        console.log('数据结构data=>', data)
+        const data = response.data
+
         this.dataList.nodes = data.map((item) => {
           item.start.rowId = item.start.rowId.toString()
           return item.start
         })
-        console.log(this.dataList)
+
         this.initGraph(this.dataList)
       })
   },
@@ -256,7 +253,7 @@ export default {
             // return 'M' + d.target.x + ' ' + d.target.y + ' L' +  d.source.x + ' ' + d.source.y
               return `
               M${d.target.x},${d.target.y}
-              A${r},${r} 1 0,1 ${d.source.x},${d.source.y}
+              A${r},${r} 0 0,1 ${d.source.x},${d.source.y}
             `
             }
           })
@@ -395,7 +392,7 @@ export default {
       this.form.partyIsCust = items.partyIsCust
       axios.get('http://10.20.11.251:8084/szwm/neo/partytocase/selectPartyToCaseByPartyId?rowId=' + items.rowId)
         .then(response => {
-          const data = JSOG.decode(response.data)
+          const data = response.data
           // 重构 end 数组
           const array = data.map((item) => {
             item.end.rowId = item.end.rowId.toString()

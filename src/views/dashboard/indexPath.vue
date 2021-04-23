@@ -439,7 +439,7 @@ export default {
         .join('path')
         .attr('stroke-width', d => Math.sqrt(d.value))
         .attr('id', d => d.source + '_' + d.relationship + '_' + d.target)
-      
+
       this.linksName = g.append('g')
         .selectAll('text')
         .data(links)
@@ -491,7 +491,7 @@ export default {
 
       this.simulation.on('tick', () => {
         this.links
-        .attr('d', d=> 'M' + d.source.x + ' ' + d.source.y + ' L' +  d.target.x + ' ' + d.target.y)
+          .attr('d', d => 'M' + d.source.x + ' ' + d.source.y + ' L' + d.target.x + ' ' + d.target.y)
           // .attr('x1', d => d.source.x)
           // .attr('y1', d => d.source.y)
           // .attr('x2', d => d.target.x)

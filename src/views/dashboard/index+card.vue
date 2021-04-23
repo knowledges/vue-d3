@@ -57,7 +57,6 @@
 <script>
 import * as d3 from 'd3'
 import axios from 'axios'
-import JSOG from 'jsog'
 export default {
   name: 'Index',
   components: {},
@@ -94,19 +93,17 @@ export default {
   },
   computed: {},
   watch: {},
-  created() {
-    console.log(JSOG)
-  },
+  created() {},
   mounted() {
     axios.get('http://10.20.11.251:8084/szwm/neo/partytocase/selectPartyToCaseByCaseTimes?times=5')
       .then(response => {
-        const data = JSOG.decode(response.data)
-        console.log('数据结构data=>', data)
+        const data = response.data
+
         this.dataList.nodes = data.map((item) => {
           item.start.rowId = item.start.rowId.toString()
           return item.start
         })
-        console.log(this.dataList)
+
         this.initGraph(this.dataList)
       })
   },
@@ -121,16 +118,14 @@ export default {
       this.simulation = d3.forceSimulation(nodes)
         .force('link', d3.forceLink(links).id(d => d.rowId).distance(180).strength(0.1)) // 弹簧力
         .force('charge', d3.forceManyBody()) // 电荷力[吸引力]
+        .force("x", d3.forceX())
+        .force("y", d3.forceY())
         .force('collision', d3.forceCollide(r * 2)) // 碰撞检测
-        // .force('radial', d3.forceRadial()
-        //   .radius(this.condition.r + 10)
-        //   .x(d => d.x)
-        //   .y(d => d.y)
-        // )
         .force('center', d3.forceCenter(width / 2, height / 2)) // 向心力
 
       const svg = d3.select('.container')
         .append('svg')
+        .style("font", '12px sans-serif')
         .style('width', 750)
         .style('height', 500)
         .style('position', 'absolute')
@@ -395,7 +390,7 @@ export default {
       this.form.partyIsCust = items.partyIsCust
       axios.get('http://10.20.11.251:8084/szwm/neo/partytocase/selectPartyToCaseByPartyId?rowId=' + items.rowId)
         .then(response => {
-          const data = JSOG.decode(response.data)
+          const data = response.data
           // 重构 end 数组
           const array = data.map((item) => {
             item.end.rowId = item.end.rowId.toString()
